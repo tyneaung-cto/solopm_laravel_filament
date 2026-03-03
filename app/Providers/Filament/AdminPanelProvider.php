@@ -5,6 +5,7 @@ namespace App\Providers\Filament;
 use App\Filament\Pages\TaskBoard;
 use BezhanSalleh\FilamentShield\FilamentShieldPlugin;
 use Devonab\FilamentEasyFooter\EasyFooterPlugin;
+use EightCedars\FilamentInactivityGuard\FilamentInactivityGuardPlugin;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
@@ -58,6 +59,7 @@ class AdminPanelProvider extends PanelProvider
                 FilamentSpatieLaravelBackupPlugin::make()->usingPage(Backups::class),
                 FilamentSpatieLaravelHealthPlugin::make(),
                 EasyFooterPlugin::make(),
+                FilamentInactivityGuardPlugin::make(),
 
 
                 FilamentEnvEditorPlugin::make()
