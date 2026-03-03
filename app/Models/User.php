@@ -55,7 +55,10 @@ class User extends Authenticatable implements FilamentUser
             'two_factor_confirmed_at' => 'datetime',
         ];
     }
-
+    public function notes()
+    {
+        return $this->hasMany(Note::class);
+    }
     public function isAdmin(): bool
     {
         return $this->hasRole('super_admin');
