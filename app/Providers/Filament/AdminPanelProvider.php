@@ -4,6 +4,7 @@ namespace App\Providers\Filament;
 
 use App\Filament\Pages\TaskBoard;
 use BezhanSalleh\FilamentShield\FilamentShieldPlugin;
+use Boquizo\FilamentLogViewer\FilamentLogViewerPlugin;
 use Devonab\FilamentEasyFooter\EasyFooterPlugin;
 use EightCedars\FilamentInactivityGuard\FilamentInactivityGuardPlugin;
 use Filament\Http\Middleware\Authenticate;
@@ -62,6 +63,8 @@ class AdminPanelProvider extends PanelProvider
                 FilamentSpatieLaravelHealthPlugin::make(),
                 EasyFooterPlugin::make(),
                 FilamentInactivityGuardPlugin::make(),
+                FilamentLogViewerPlugin::make(),
+
                 FileManagerPlugin::make([
                     FileManager::class,
                 ]),
