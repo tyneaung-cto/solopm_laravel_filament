@@ -176,7 +176,11 @@ class TaskBoard extends BoardPage
                     ->icon('heroicon-o-plus')
                     ->model(Task::class)
                     ->form([
-                        TextInput::make('title')->required()->maxLength(255),
+                        TextInput::make('title')
+                            ->required()
+                            ->maxLength(100)
+                            ->live()
+                            ->helperText(fn ($state) => strlen($state ?? '') . ' / 100 characters'),
                         RichEditor::make('description')
                             ->required()
                             ->extraAttributes([

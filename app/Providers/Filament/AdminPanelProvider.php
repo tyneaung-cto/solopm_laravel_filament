@@ -3,6 +3,7 @@
 namespace App\Providers\Filament;
 
 use App\Filament\Pages\TaskBoard;
+use Awcodes\QuickCreate\QuickCreatePlugin;
 use BezhanSalleh\FilamentShield\FilamentShieldPlugin;
 use Boquizo\FilamentLogViewer\FilamentLogViewerPlugin;
 use Devonab\FilamentEasyFooter\EasyFooterPlugin;
@@ -42,9 +43,11 @@ class AdminPanelProvider extends PanelProvider
             ->id('admin')
             ->path('into')
             ->viteTheme('resources/css/filament/admin/theme.css')
+            // ->viteTheme('resources/js/filament/board-collapse.js')
             ->login()
+
             ->colors([
-                'primary' => Color::Amber,
+                'primary' => Color::Purple,
             ])
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\Filament\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\Filament\Pages')
@@ -82,6 +85,8 @@ class AdminPanelProvider extends PanelProvider
                     FileManager::class,
                 ]),
 
+                QuickCreatePlugin::make(),
+
 
                 FilamentEnvEditorPlugin::make()
                     ->navigationGroup('Settings')
@@ -97,6 +102,10 @@ class AdminPanelProvider extends PanelProvider
                 FilamentBackgroundsPlugin::make()
                     ->showAttribution(false),
             ])
+            // ->renderHook(
+            //     'panels::body.end',
+            //     fn() => view('filament.scripts.board-collapse')
+            // )
             ->middleware([
                 EncryptCookies::class,
                 AddQueuedCookiesToResponse::class,

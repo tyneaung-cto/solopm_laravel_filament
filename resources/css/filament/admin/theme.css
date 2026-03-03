@@ -6,6 +6,20 @@
 
 @source "../../../../vendor/relaticle/flowforge/resources/views/**/*.blade.php";
 
+@source '../../../../vendor/awcodes/filament-quick-create/resources/**/*.blade.php';
+
+/* Limit image width inside RichEditor */
+.trix-content img {
+    max-width: 400px;   /* default width */
+    height: auto;
+    border-radius: 8px;
+}
+
+/* Make images responsive */
+.trix-content {
+    overflow-wrap: break-word;
+}
+
 
 /* ================================
    File Manager Dark Mode Fix (Strong Override)
