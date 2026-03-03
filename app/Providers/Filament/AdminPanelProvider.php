@@ -24,6 +24,8 @@ use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
+use MWGuerra\FileManager\Filament\Pages\FileManager;
+use MWGuerra\FileManager\FileManagerPlugin;
 use ShuvroRoy\FilamentSpatieLaravelBackup\FilamentSpatieLaravelBackupPlugin;
 use ShuvroRoy\FilamentSpatieLaravelBackup\Pages\Backups;
 use ShuvroRoy\FilamentSpatieLaravelHealth\FilamentSpatieLaravelHealthPlugin;
@@ -60,6 +62,9 @@ class AdminPanelProvider extends PanelProvider
                 FilamentSpatieLaravelHealthPlugin::make(),
                 EasyFooterPlugin::make(),
                 FilamentInactivityGuardPlugin::make(),
+                FileManagerPlugin::make([
+                    FileManager::class,
+                ]),
 
 
                 FilamentEnvEditorPlugin::make()
