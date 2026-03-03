@@ -14,6 +14,7 @@ use Filament\PanelProvider;
 use Filament\Support\Colors\Color;
 use Filament\Widgets\AccountWidget;
 use Filament\Widgets\FilamentInfoWidget;
+use GeoSot\FilamentEnvEditor\FilamentEnvEditorPlugin;
 use Hammadzafar05\MobileBottomNav\MobileBottomNav;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use Illuminate\Cookie\Middleware\EncryptCookies;
@@ -55,6 +56,18 @@ class AdminPanelProvider extends PanelProvider
                 MobileBottomNav::make()->fromNavigation(5),
                 FilamentSpatieLaravelBackupPlugin::make()->usingPage(Backups::class),
                 FilamentSpatieLaravelHealthPlugin::make(),
+
+
+                FilamentEnvEditorPlugin::make()
+                    ->navigationGroup('Settings')
+                    ->navigationLabel('My Env')
+                    ->navigationIcon('heroicon-o-cog-8-tooth')
+                    ->navigationSort(1)
+                    ->hideKeys('APP_KEY', 'BCRYPT_ROUNDS')
+                    ->slug('env-editor')
+                    ->authorize(
+                        fn() => auth()->user()->isAdmin()
+                    ),
 
                 FilamentBackgroundsPlugin::make()
                     ->showAttribution(false),
