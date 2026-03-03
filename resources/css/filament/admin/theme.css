@@ -2,3 +2,71 @@
 
 @source '../../../../app/Filament/**/*';
 @source '../../../../resources/views/filament/**/*';
+
+
+@source "../../../../vendor/relaticle/flowforge/resources/views/**/*.blade.php";
+
+
+/* ================================
+   File Manager Dark Mode Fix (Strong Override)
+================================ */
+
+/* Main wrapper */
+.dark .file-manager,
+.dark .filemanager,
+.dark .fm-wrapper,
+.dark .fm-body {
+    background: #0b0f19 !important;
+    color: #e5e7eb !important;
+}
+
+/* Left sidebar / tree panel */
+.dark .fm-tree,
+.dark .filemanager .sidebar,
+.dark .filemanager .fm-tree {
+    background: #111827 !important;
+    border-right: 1px solid #1f2937 !important;
+}
+
+/* Remove white backgrounds inside tree */
+.dark .fm-tree *,
+.dark .filemanager .sidebar * {
+    background-color: transparent !important;
+}
+
+/* Tree text */
+.dark .fm-tree a,
+.dark .fm-tree span,
+.dark .filemanager .sidebar a {
+    color: #d1d5db !important;
+}
+
+/* Active / hover */
+.dark .fm-tree .active,
+.dark .fm-tree a:hover,
+.dark .filemanager .sidebar a:hover {
+    background: #1f2937 !important;
+    color: #fbbf24 !important;
+}
+
+/* Main content area */
+.dark .fm-content,
+.dark .filemanager .content {
+    background: #0b0f19 !important;
+}
+
+/* File cards */
+.dark .filemanager .card,
+.dark .fm-content .card {
+    background: #111827 !important;
+    border: 1px solid #1f2937 !important;
+    color: #e5e7eb !important;
+}
+
+/* Top select bar (the white bar in your screenshot) */
+.dark .filemanager .toolbar,
+.dark .filemanager .bulk-actions,
+.dark .fm-content .bg-white {
+    background: #111827 !important;
+    color: #e5e7eb !important;
+}

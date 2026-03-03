@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Filament\Resources\Users\Tables;
+namespace App\Filament\Resources\TaskStatuses\Tables;
 
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
@@ -8,20 +8,31 @@ use Filament\Actions\EditAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 
-class UsersTable
+class TaskStatusesTable
 {
     public static function configure(Table $table): Table
     {
         return $table
+            ->defaultSort('position')
+            ->reorderable('position')
             ->columns([
-                TextColumn::make('name')
-                    ->searchable(),
-                TextColumn::make('email')
-                    ->label('Email address')
-                    ->searchable(),
-                TextColumn::make('email_verified_at')
-                    ->dateTime()
-                    ->sortable(),
+                TextColumn::make('position')
+                    ->numeric()
+                    ->sortable()
+                    ->label('Order'),
+
+                TextColumn::make('label'),
+
+                TextColumn::make('key')
+                    ->badge()
+                    ->color(fn(string $state): string => match ($state) {
+                        'backlog' => 'gray',
+                        'todo' => 'info',
+                        'done-by-dev' => 'warning',
+                        'completed' => 'success',
+                        default => 'secondary',
+                    }),
+
                 TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
@@ -30,10 +41,6 @@ class UsersTable
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
-                TextColumn::make('two_factor_confirmed_at')
-                    ->dateTime()
-                    ->toggleable(isToggledHiddenByDefault: true)
-                    ->sortable(),
             ])
             ->filters([
                 //

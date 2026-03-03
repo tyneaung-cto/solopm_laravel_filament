@@ -20,6 +20,7 @@
         "laravel/tinker": "^2.10.1",
         "laravel/wayfinder": "^0.1.9",
         "mwguerra/filemanager": "^2.0",
+        "propaganistas/laravel-disposable-email": "^2.4",
         "relaticle/flowforge": "^4.0",
         "shuvroroy/filament-spatie-laravel-backup": "^3.3",
         "shuvroroy/filament-spatie-laravel-health": "^3.2",

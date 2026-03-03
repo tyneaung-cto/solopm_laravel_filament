@@ -11,12 +11,13 @@ use Filament\Actions\EditAction;
 use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
-use Filament\Infolists\Components\ImageEntry;
+use Filament\Forms\Components\DatePicker;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Schema;
 use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Str;
 use Relaticle\Flowforge\Board;
 use Relaticle\Flowforge\BoardPage;
 use Relaticle\Flowforge\Column;
@@ -30,6 +31,16 @@ class TaskBoard extends BoardPage
 
     protected static ?string $title = 'Task Board';
 
+    public function getMaxContentWidth(): ?string
+    {
+        return 'full';
+    }
+
+    public function getHeading(): ?string
+    {
+        return null;
+    }
+
     public function board(Board $board): Board
     {
         return $board
@@ -37,83 +48,140 @@ class TaskBoard extends BoardPage
             ->recordTitleAttribute('title')
             ->columnIdentifier('status')
             ->positionIdentifier('position') // Enable drag-and-drop with position field
-            ->cardSchema(fn (Schema $schema) => $schema->components([
-                TextEntry::make('title')->weight('bold')->size('lg'),
-                TextEntry::make('description')->limit(120)->color('gray'),
+            ->cardSchema(fn(Schema $schema) => $schema->components([
+
+                TextEntry::make('description')
+                    ->hiddenLabel()
+                    ->formatStateUsing(fn($state) => Str::limit(strip_tags($state), 120))
+                    ->color('gray'),
                 CardFlex::make([
-                    TextEntry::make('priority')->badge()->color(fn ($state) => match ($state) {
-                        'high' => 'danger',
-                        'medium' => 'warning',
-                        'low' => 'success',
-                        default => 'gray',
-                    }),
-                    TextEntry::make('due_date')->date()->icon('heroicon-o-calendar'),
-                    ImageEntry::make('assignee.avatar_url')->circular()->size(24),
+                    TextEntry::make('priority')
+                        ->hiddenLabel()
+                        ->badge()
+                        ->color(fn($state) => match ($state) {
+                            'high' => 'danger',
+                            'medium' => 'warning',
+                            'low' => 'success',
+                            default => 'gray',
+                        }),
+
+                    TextEntry::make('due_date')
+                        ->hiddenLabel()
+                        ->date()
+                        ->icon('heroicon-o-calendar')
+                        ->color(function ($state) {
+                            if (! $state) {
+                                return 'gray';
+                            }
+
+                            $due = \Illuminate\Support\Carbon::parse($state)->startOfDay();
+                            $today = now()->startOfDay();
+
+                            // Signed difference (negative = past, positive = future)
+                            $days = $today->diffInDays($due, false);
+
+                            if ($days < 0) {
+                                return 'danger'; // Overdue
+                            }
+
+                            if ($days <= 2) {
+                                return 'danger'; // Very near
+                            }
+
+                            if ($days <= 5) {
+                                return 'warning'; // Near
+                            }
+
+                            return 'success'; // Far future
+                        })
+                        ->extraAttributes(function ($state) {
+                            if (! $state) {
+                                return [];
+                            }
+
+                            $due = \Illuminate\Support\Carbon::parse($state)->startOfDay();
+                            $today = now()->startOfDay();
+                            $days = $today->diffInDays($due, false);
+
+                            if ($days < 0) {
+                                return [
+                                    'class' => 'line-through font-semibold',
+                                ];
+                            }
+
+                            return [];
+                        }),
+
+                    TextEntry::make('assignee.name')
+                        ->hiddenLabel()
+                        ->icon('heroicon-o-user')
+                        ->color('gray'),
                 ])->wrap()->justify('start')->align('center'),
             ]))
             ->actions([
-                Action::make('create')
-                    ->label('Create Task')
-                    ->icon('heroicon-o-plus')
-                    ->form([
-                        TextInput::make('title')->required()->maxLength(255),
-                        RichEditor::make('description')
-                            ->fileAttachmentsAcceptedFileTypes([
-                                'image/png',
-                                'image/jpeg',
-                                'image/gif',
-                                'image/webp',
-                                'application/pdf',
-                            ])
-                            ->fileAttachmentsMaxSize(51200),
-                        Select::make('status')
-                            ->options([
-                                'todo' => 'To Do',
-                                'in_progress' => 'In Progress',
-                                'completed' => 'Completed',
-                            ])
-                            ->default('todo')
-                            ->required(),
-                        Select::make('priority')
-                            ->options([
-                                'low' => 'Low',
-                                'medium' => 'Medium',
-                                'high' => 'High',
-                            ])
-                            ->default('medium')
-                            ->required(),
-                        TextInput::make('due_date')->type('date'),
-                        Select::make('user_id')
-                            ->label('Assignee')
-                            ->relationship('assignee', 'name')
-                            ->searchable()
-                            ->preload()
-                            ->nullable(),
-                    ])
-                    ->action(function (array $data): void {
-                        $position = $this->getBoardPositionInColumn($data['status'] ?? 'todo', 'bottom');
+                // Action::make('create')
+                //     ->label('Create Task')
+                //     ->icon('heroicon-o-plus')
+                //     ->form([
+                //         TextInput::make('title')->required()->maxLength(255),
+                //         RichEditor::make('description')
+                //             ->fileAttachmentsAcceptedFileTypes([
+                //                 'image/png',
+                //                 'image/jpeg',
+                //                 'image/gif',
+                //                 'image/webp',
+                //                 'application/pdf',
+                //             ])
+                //             ->fileAttachmentsMaxSize(51200),
+                //         Select::make('status')
+                //             ->options(fn () => TaskStatus::orderBy('position')->pluck('label', 'key')->toArray())
+                //             ->default(fn () => TaskStatus::orderBy('position')->value('key'))
+                //             ->required(),
+                //         Select::make('priority')
+                //             ->options([
+                //                 'low' => 'Low',
+                //                 'medium' => 'Medium',
+                //                 'high' => 'High',
+                //             ])
+                //             ->default('medium')
+                //             ->required(),
+                //         TextInput::make('due_date')->type('date'),
+                //         Select::make('user_id')
+                //             ->label('Assignee')
+                //             ->relationship('assignee', 'name')
+                //             ->searchable()
+                //             ->preload()
+                //             ->nullable(),
+                //     ])
+                //     ->action(function (array $data): void {
+                //         $position = $this->getBoardPositionInColumn($data['status'] ?? 'todo', 'bottom');
 
-                        Task::create([
-                            'title' => $data['title'],
-                            'description' => $data['description'] ?? null,
-                            'status' => $data['status'] ?? 'todo',
-                            'position' => $position,
-                            'priority' => $data['priority'] ?? 'medium',
-                            'due_date' => $data['due_date'] ?? null,
-                            'user_id' => $data['user_id'] ?? auth()->user()?->id,
-                        ]);
+                //         Task::create([
+                //             'title' => $data['title'],
+                //             'description' => $data['description'] ?? null,
+                //             'status' => $data['status'] ?? 'todo',
+                //             'position' => $position,
+                //             'priority' => $data['priority'] ?? 'medium',
+                //             'due_date' => $data['due_date'] ?? null,
+                //             'user_id' => $data['user_id'] ?? auth()->user()?->id,
+                //         ]);
 
-                        // Emit an event to refresh the board UI
-                        $this->dispatch('kanban-item-created');
-                    }),
+                //         // Emit an event to refresh the board UI
+                //         $this->dispatch('kanban-item-created');
+                //     }),
             ])
             ->columnActions([
                 CreateAction::make()
-                    ->label('Add Task')
+                    ->label('Add')
+                    ->icon('heroicon-o-plus')
                     ->model(Task::class)
                     ->form([
                         TextInput::make('title')->required()->maxLength(255),
                         RichEditor::make('description')
+                            ->required()
+                            ->extraAttributes([
+                                'style' => 'min-height: 300px;',
+                            ])
                             ->fileAttachmentsAcceptedFileTypes([
                                 'image/png',
                                 'image/jpeg',
@@ -129,12 +197,15 @@ class TaskBoard extends BoardPage
                                 'high' => 'High',
                             ])
                             ->default('medium'),
-                        TextInput::make('due_date')->type('date'),
+                        DatePicker::make('due_date')
+                            ->minDate(now()->addDay())
+                            ->required(),
                         Select::make('user_id')
                             ->label('Assignee')
                             ->relationship('assignee', 'name')
                             ->searchable()
                             ->preload()
+                            ->default(fn() => auth()->id())
                             ->nullable(),
                     ])
                     ->mutateFormDataUsing(function (array $data, array $arguments): array {
@@ -154,6 +225,10 @@ class TaskBoard extends BoardPage
                     ->form([
                         TextInput::make('title')->required()->maxLength(255),
                         RichEditor::make('description')
+                            ->required()
+                            ->extraAttributes([
+                                'style' => 'min-height: 300px;',
+                            ])
                             ->fileAttachmentsAcceptedFileTypes([
                                 'image/png',
                                 'image/jpeg',
@@ -169,11 +244,7 @@ class TaskBoard extends BoardPage
                             ->preload()
                             ->nullable(),
                         Select::make('status')
-                            ->options([
-                                'todo' => 'To Do',
-                                'in_progress' => 'In Progress',
-                                'completed' => 'Completed',
-                            ])
+                            ->options(fn() => TaskStatus::orderBy('position')->pluck('label', 'key')->toArray())
                             ->required(),
                         Select::make('priority')
                             ->options([
@@ -183,7 +254,9 @@ class TaskBoard extends BoardPage
                             ])
                             ->default('medium')
                             ->required(),
-                        TextInput::make('due_date')->type('date'),
+                        DatePicker::make('due_date')
+                            ->minDate(now()->addDay())
+                            ->required(false),
                     ]),
                 DeleteAction::make()->model(Task::class),
             ])
@@ -203,7 +276,7 @@ class TaskBoard extends BoardPage
                     ->preload(),
                 Filter::make('overdue')
                     ->label('Overdue')
-                    ->query(fn (Builder $query) => $query->where('due_date', '<', now()))
+                    ->query(fn(Builder $query) => $query->where('due_date', '<', now()))
                     ->toggle(),
             ])
             ->columns((function () {
