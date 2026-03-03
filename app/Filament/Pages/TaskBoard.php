@@ -3,31 +3,31 @@
 namespace App\Filament\Pages;
 
 use App\Models\Task;
+use App\Models\TaskStatus;
 use Filament\Actions\Action;
 use Filament\Actions\CreateAction;
-use Filament\Actions\EditAction;
 use Filament\Actions\DeleteAction;
-use Filament\Forms\Components\Select;
-use Filament\Forms\Components\Textarea;
+use Filament\Actions\EditAction;
 use Filament\Forms\Components\RichEditor;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
-use Filament\Infolists\Components\TextEntry;
 use Filament\Infolists\Components\ImageEntry;
-use Filament\Tables\Filters\SelectFilter;
-use Filament\Tables\Filters\Filter;
+use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Schema;
+use Filament\Tables\Filters\Filter;
+use Filament\Tables\Filters\SelectFilter;
 use Illuminate\Database\Eloquent\Builder;
 use Relaticle\Flowforge\Board;
 use Relaticle\Flowforge\BoardPage;
 use Relaticle\Flowforge\Column;
-use App\Models\TaskStatus;
 use Relaticle\Flowforge\Components\CardFlex;
-
 
 class TaskBoard extends BoardPage
 {
     protected static \BackedEnum|string|null $navigationIcon = 'heroicon-o-view-columns';
+
     protected static ?string $navigationLabel = 'Task Board';
+
     protected static ?string $title = 'Task Board';
 
     public function board(Board $board): Board
@@ -37,11 +37,11 @@ class TaskBoard extends BoardPage
             ->recordTitleAttribute('title')
             ->columnIdentifier('status')
             ->positionIdentifier('position') // Enable drag-and-drop with position field
-            ->cardSchema(fn(Schema $schema) => $schema->components([
+            ->cardSchema(fn (Schema $schema) => $schema->components([
                 TextEntry::make('title')->weight('bold')->size('lg'),
                 TextEntry::make('description')->limit(120)->color('gray'),
                 CardFlex::make([
-                    TextEntry::make('priority')->badge()->color(fn($state) => match ($state) {
+                    TextEntry::make('priority')->badge()->color(fn ($state) => match ($state) {
                         'high' => 'danger',
                         'medium' => 'warning',
                         'low' => 'success',
@@ -203,7 +203,7 @@ class TaskBoard extends BoardPage
                     ->preload(),
                 Filter::make('overdue')
                     ->label('Overdue')
-                    ->query(fn(Builder $query) => $query->where('due_date', '<', now()))
+                    ->query(fn (Builder $query) => $query->where('due_date', '<', now()))
                     ->toggle(),
             ])
             ->columns((function () {
