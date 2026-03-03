@@ -22,6 +22,7 @@ use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
 use ShuvroRoy\FilamentSpatieLaravelBackup\FilamentSpatieLaravelBackupPlugin;
 use ShuvroRoy\FilamentSpatieLaravelBackup\Pages\Backups;
+use ShuvroRoy\FilamentSpatieLaravelHealth\FilamentSpatieLaravelHealthPlugin;
 
 class AdminPanelProvider extends PanelProvider
 {
@@ -50,6 +51,7 @@ class AdminPanelProvider extends PanelProvider
             ->plugins([
                 MobileBottomNav::make()->fromNavigation(5),
                 FilamentSpatieLaravelBackupPlugin::make()->usingPage(Backups::class),
+                FilamentSpatieLaravelHealthPlugin::make(),
             ])
             ->middleware([
                 EncryptCookies::class,
