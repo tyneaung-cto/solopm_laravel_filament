@@ -6,6 +6,9 @@ use App\Filament\Resources\Users\UserResource;
 use Filament\Actions\DeleteAction;
 use Filament\Resources\Pages\EditRecord;
 
+use Illuminate\Support\Facades\Mail;
+use App\Mail\UserUpdatedMail;
+
 class EditUser extends EditRecord
 {
     protected static string $resource = UserResource::class;
@@ -15,5 +18,15 @@ class EditUser extends EditRecord
         return [
             DeleteAction::make(),
         ];
+    }
+
+    protected function afterSave(): void
+    {
+        $user = $this->record;
+
+        // Mail::to($user->email)
+        //     ->send(new UserUpdatedMail($user));
+
+        Mail::to($user->email)->queue(new UserUpdatedMail($user));
     }
 }
