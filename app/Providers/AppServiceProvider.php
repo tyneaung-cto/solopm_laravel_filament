@@ -14,6 +14,10 @@ use Spatie\Health\Checks\Checks\DebugModeCheck;
 use Spatie\Health\Checks\Checks\EnvironmentCheck;
 
 
+use App\Models\User;
+use Illuminate\Support\Facades\Gate;
+
+
 class AppServiceProvider extends ServiceProvider
 {
     /**
@@ -30,6 +34,9 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         $this->configureDefaults();
+        Gate::define('viewPulse', function (User $user) {
+            return $user->isAdmin();
+        });
         Health::checks([
             OptimizedAppCheck::new(),
             DebugModeCheck::new(),
