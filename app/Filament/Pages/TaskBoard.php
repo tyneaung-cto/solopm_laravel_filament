@@ -23,6 +23,11 @@ use Relaticle\Flowforge\BoardPage;
 use Relaticle\Flowforge\Column;
 use Relaticle\Flowforge\Components\CardFlex;
 
+use Illuminate\Support\Facades\Mail;
+use App\Mail\TaskCreatedMail;
+use App\Mail\TaskUpdatedMail;
+use App\Models\User;
+
 class TaskBoard extends BoardPage
 {
     protected static \BackedEnum|string|null $navigationIcon = 'heroicon-o-view-columns';
@@ -175,12 +180,26 @@ class TaskBoard extends BoardPage
                     ->label('Add')
                     ->icon('heroicon-o-plus')
                     ->model(Task::class)
+                    ->after(function (Task $record) {
+
+                        $admins = User::role(['super_admin', 'admin'])->get();
+
+                        $recipients = $admins->pluck('email')->toArray();
+
+                        if ($record->assignee?->email) {
+                            $recipients[] = $record->assignee->email;
+                        }
+
+                        foreach ($recipients as $email) {
+                            Mail::to($email)->queue(new TaskCreatedMail($record));
+                        }
+                    })
                     ->form([
                         TextInput::make('title')
                             ->required()
                             ->maxLength(100)
                             ->live()
-                            ->helperText(fn ($state) => strlen($state ?? '') . ' / 100 characters'),
+                            ->helperText(fn($state) => strlen($state ?? '') . ' / 100 characters'),
                         RichEditor::make('description')
                             ->required()
                             ->extraAttributes([
@@ -226,6 +245,21 @@ class TaskBoard extends BoardPage
             ])
             ->cardActions([
                 EditAction::make()->model(Task::class)
+                    ->after(function (Task $record) {
+
+                        $admins = User::role(['super_admin', 'admin'])->get();
+
+                        $recipients = $admins->pluck('email')->toArray();
+                        $recipients = collect($recipients)->unique();
+
+                        if ($record->assignee?->email) {
+                            $recipients[] = $record->assignee->email;
+                        }
+
+                        foreach ($recipients as $email) {
+                            Mail::to($email)->queue(new TaskUpdatedMail($record));
+                        }
+                    })
                     ->form([
                         TextInput::make('title')->required()->maxLength(255),
                         RichEditor::make('description')
